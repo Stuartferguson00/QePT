@@ -1,4 +1,4 @@
-# Quantum-enhanced Parallel Tempring Simulator
+# Quantum-enhanced Parallel Tempering Simulator
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 [![Qiskit 2.2](https://img.shields.io/badge/Qiskit-2.2-blueviolet)](https://quantum.cloud.ibm.com/docs/en/api/qiskit/release-notes/2.2)
@@ -46,3 +46,4 @@ For questions, suggestions, or collaboration, please feel free to contact the au
  ## Acknowledgements
 
 Note: Arxiv paper not yet uploaded
+
