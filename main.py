@@ -20,7 +20,7 @@ if __name__ == "__main__":
     n_spin = 7
     m_replica = 4
     m_quantum_replica = 2
-    repetitions = 10
+    repetitions = 2
     
     
     gamma = (0.25,0.6)

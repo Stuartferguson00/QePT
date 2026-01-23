@@ -180,8 +180,7 @@ class QePT():
                 - energies (np.ndarray): Energy trajectories for all replicas
                 - current_states (list): Final states of all replicas
                 
-        Note:
-            Samples are tracked at every replica exchange, not at every MCMC step.
+
         """        
 
         # Initialize random starting configurations for all replicas
@@ -195,18 +194,18 @@ class QePT():
             #energies[i, 0] = current_states[i].energy
 
         #print("n_steps // n_steps_between_exchange:", n_steps // n_steps_between_exchange)
-        
+        n_steps_between_exchange = n_steps_between_exchange//2  # Adjust for odd-even exchange scheme
         # Main parallel tempering loop
-        for n in trange((n_steps // n_steps_between_exchange)+1, desc="Running QePT", leave=False, disable = not verbose):
+        for n in trange((n_steps // (n_steps_between_exchange))+1, desc="Running QePT", leave=False, disable = not verbose):
 
             # Update each replica in parallel for n_steps_between_exchange steps
-            # Maybe consider actually parallelising this...
             
             #updated_states = Parallel(n_jobs=-1)(
             #    delayed(self.update_n)(mcmc, current_states[i], n_steps_between_exchange)
             #    for i, mcmc in enumerate(self.mcmcs)
             #)
 
+            # Not actually in parallel...
             if n < n_steps // n_steps_between_exchange:
                 updated_states = [
                     self.update_n(mcmc, current_states[i], n_steps_between_exchange)
@@ -219,13 +218,22 @@ class QePT():
                     for i, mcmc in enumerate(self.mcmcs)
                 ]
             current_states = updated_states
+
+            # Attempt replica exchanges in an odd-even manner
+
             
-            # Attempt replica exchanges between adjacent temperature pairs
-            # Note: Only adjacent pairs are considered (standard parallel tempering)
-            for i in range(self.m_replicas - 1):
-                if self.swap_accept(current_states[i].bitstring, current_states[i + 1].bitstring, temps[i], temps[i + 1]):
-                    # Swap the configurations between adjacent replicas
-                    current_states[i], current_states[i + 1] = current_states[i + 1], current_states[i]
-            
+            if n % 2 == 0:
+                #Odd swaps
+                for i in range(1, self.m_replicas - 1, 2):  # Odd pairs
+                    if self.swap_accept(current_states[i].bitstring, current_states[i + 1].bitstring, temps[i], temps[i + 1]):
+                        current_states[i], current_states[i + 1] = current_states[i + 1], current_states[i]
+                #print(f"Completed (odd) exchange step {n+1}, at {(n+1) * n_steps_between_exchange + 1}")
+            else:
+                #Even swaps
+                for i in range(0, self.m_replicas - 1, 2):  # Even pairs
+                    if self.swap_accept(current_states[i].bitstring, current_states[i + 1].bitstring, temps[i], temps[i + 1]):
+                        current_states[i], current_states[i + 1] = current_states[i + 1], current_states[i]
+                #print(f"Completed (even) exchange step {n+1}, at {(n+1) * n_steps_between_exchange + 1}")
+
 
         return current_states
