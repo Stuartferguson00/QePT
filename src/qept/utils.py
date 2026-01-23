@@ -1,7 +1,5 @@
-import os
 import pickle
-import numpy as np
-from typing import List, Tuple, Union
+from typing import List
 from qemcmc.energy_models import EnergyModel
 from pathlib import Path
 

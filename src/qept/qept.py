@@ -2,21 +2,17 @@
 Quantum-Enhanced Parallel Tempering (QePT) Implementation
 
 This module implements a parallel tempering algorithm that can utilize quantum-enhanced
-MCMC (QeMCMC) alongside classical MCMC methods for enhanced sampling of complex
-energy landscapes.
-
-Dependencies:
-    - qemcmc: Quantum-enhanced MCMC library (version 0.3.1)
-    - numpy: Numerical computing
-    - joblib: Parallel computation
+MCMC (QeMCMC) alongside classical MCMC methods for enhanced sampling of glassy boltzmann distribtuions. 
+Primarilty built for optimisation, but can easily be refactored for sampling applications. 
 """
 
 from qemcmc.MCMC import MCMC
 from qemcmc.QeMCMC_ import QeMCMC
 from qemcmc.ClassicalMCMC import ClassicalMCMC
 from qemcmc.helpers import get_random_state
-from qemcmc.helpers import MCMCState  # MCMCChain removed as it's not used
-import typing
+from qemcmc.helpers import MCMCState 
+from qemcmc.energy_models import EnergyModel
+from typing import List, Dict
 import numpy as np
 from tqdm import trange
 
@@ -29,14 +25,8 @@ class QePT():
     multiple proposal methods including classical local/uniform moves and quantum-enhanced
     MCMC (QeMCMC) methods. Different replicas can use different proposal mechanisms.
     
-    Attributes:
-        model: The energy model to sample from
-        m_replicas (int): Number of temperature replicas
-        mcmcs (list): List of MCMC objects for each replica
-        update (callable, optional): Update function for QeMCMC replicas
     """
-    #Uses qemcmcm 0.3.1
-    def __init__(self,  model, proposals, quantum_args_dict: typing.Dict = None):
+    def __init__(self,  model:EnergyModel, proposals:List[str], quantum_args_dict: Dict = None):
         """
         Initialize the QePT algorithm with specified model and proposal methods.
         
@@ -45,13 +35,13 @@ class QePT():
                     - get_energy(state): Return energy of a given state
                     - num_spins: Number of spins/variables in the system
             proposals (list): List of proposal method strings for each replica.
-                                Valid options: 'local', 'uniform', 'qemcmc'
+                    Valid options: 'local', 'uniform', 'qemcmc'
             quantum_args_dict (dict, optional): Dictionary containing quantum MCMC parameters.
-                                                Required keys for 'qemcmc' proposals:
-                                                - 'gamma': Quantum parameter
-                                                - 'time': Evolution time parameter
-                                                Optional keys:
-                                                - 'delta_time': Time step (default: 0.8)
+                    Required keys for 'qemcmc' proposals:
+                    - 'gamma': Quantum parameter
+                    - 'time': Evolution time parameter
+                    Optional keys:
+                    - 'delta_time': Time step (default: 0.8)
         
         Raises:
             ValueError: If invalid proposal method is specified or required quantum
@@ -143,7 +133,7 @@ class QePT():
             energy_s = energy_sprime  # This line could be removed as optimization
         return current_state
         
-    def swap_accept(self, conf1, conf2, temp1, temp2):
+    def swap_accept(self, conf1: str, conf2: str, temp1: float, temp2: float) -> bool:
         """
         Determine whether to accept a replica exchange (swap) between two configurations.
         
