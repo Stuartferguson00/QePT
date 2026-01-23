@@ -4,7 +4,9 @@
 [![Qiskit 2.2](https://img.shields.io/badge/Qiskit-2.2-blueviolet)](https://quantum.cloud.ibm.com/docs/en/api/qiskit/release-notes/2.2)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This library provides a simple implementation of Quantum-enhanced Parallel Tempering (QePT), as introduced in a recent Arxiv paper. The QeMCMC subroutines are abstracted to a seperate repo, [Qemcmc](https://github.com/Stuartferguson00/QeMCMC) 
+
+This library provides a simple implementation of Quantum-enhanced Parallel Tempering (QePT), as introduced in a recent Arxiv paper. The QeMCMC subroutines are abstracted to a seperate repo, [QeMCMC](https://github.com/Stuartferguson00/QeMCMC) See also the related method [Quantum-enhanced Simulated Annealing (QeSA)](https://github.com/Stuartferguson00/QeSA).
+
 
 
 ## Installation
@@ -46,4 +48,5 @@ For questions, suggestions, or collaboration, please feel free to contact the au
  ## Acknowledgements
 
 Note: Arxiv paper not yet uploaded
+
 
