@@ -1,0 +1,48 @@
+# Quantum-enhanced Parallel Tempring Simulator
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
+[![Qiskit 2.2](https://img.shields.io/badge/Qiskit-2.2-blueviolet)](https://quantum.cloud.ibm.com/docs/en/api/qiskit/release-notes/2.2)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+This library provides a simple implementation of Quantum-enhanced Parallel Tempering (QePT), as introduced in a recent Arxiv paper. The QeMCMC subroutines are abstracted to a seperate repo, [Qemcmc](https://github.com/Stuartferguson00/QeMCMC) 
+
+
+## Installation
+
+This project uses [`uv`](https://astral.sh/uv), an extremely fast Python package installer written in Rust, intended as a drop-in replacement for `pip` and `pip-tools`.
+
+1.  **Install `uv`:**
+    Follow official installation instructions at [astral.sh/uv](https://astral.sh/uv). For macOS and Linux run:
+
+    ```bash
+    curl -LsSf [https://astral.sh/uv/install.sh](https://astral.sh/uv/install.sh) | sh
+    ```
+
+2.  **Create the Virtual Environment:**
+    From the project's root directory, run the following command:
+    ```bash
+    uv sync
+    ```
+    This will create a local `.venv` folder and install all required dependencies from `pyproject.toml` and `uv.lock`.
+
+## Quick Start
+See main.py for a simple implementation of the code, and initialise_models.py to create instances of spin glass ising models 
+
+
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## Authors and Contact
+
+This project was created by Stuart Ferguson with contributions from Feroz Hassan.
+
+For questions, suggestions, or collaboration, please feel free to contact the authors:
+
+-   S.A.Ferguson-3@sms.ed.ac.uk.
+-   F.M.Hassan@sms.ed.ac.uk
+
+ ## Acknowledgements
+
+Note: Arxiv paper not yet uploaded
