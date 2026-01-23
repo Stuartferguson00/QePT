@@ -1,0 +1,17 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: QePT
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Stuart
+    family-names: Ferguson
+    email: s1846096@ed.ac.uk
+    affiliation: University of Edinburgh
+    orcid: 'https://orcid.org/0009-0003-5750-4840'
+repository-code: 'https://github.com/Stuartferguson00/QePT'
+license: MIT
