@@ -6,12 +6,20 @@ MCMC (QeMCMC) alongside classical MCMC methods for enhanced sampling of glassy b
 Primarilty built for optimisation, but can easily be refactored for sampling applications. 
 """
 
-from qemcmc.MCMC import MCMC
-from qemcmc.QeMCMC_ import QeMCMC
-from qemcmc.ClassicalMCMC import ClassicalMCMC
-from qemcmc.helpers import get_random_state
-from qemcmc.helpers import MCMCState 
-from qemcmc.energy_models import EnergyModel
+# from qemcmc.MCMC import MCMC
+# from qemcmc.QeMCMC_ import QeMCMC
+# from qemcmc.ClassicalMCMC import ClassicalMCMC
+# from qemcmc.helpers import get_random_state
+# from qemcmc.helpers import MCMCState 
+# from qemcmc.energy_models import EnergyModel
+
+from qemcmc.model.energy_model import EnergyModel
+from qemcmc.sampler.qe_mcmc import QeMCMC
+from qemcmc.sampler.mcmc import MCMC
+from qemcmc.sampler.classical_mcmc import ClassicalMCMC
+from qemcmc.utils.helpers import get_random_state
+from qemcmc.utils.helpers import MCMCState, MCMCChain
+
 from typing import List, Dict
 import numpy as np
 from tqdm import trange
@@ -158,7 +166,7 @@ class QePT():
         # Apply Metropolis criterion for replica exchange
         return np.exp(delta) > np.random.uniform(0, 1)
     
-    def run(self, n_steps: int, temps: np.ndarray, n_steps_between_exchange: int, verbose: bool = False) -> tuple:  # Fixed return type
+    def run(self, n_steps: int, temps: np.ndarray, n_steps_between_exchange: int, verbose: bool = False) -> np.ndarray:  # Fixed return type
         """
         Execute the complete QePT algorithm for the specified number of steps.
         
@@ -175,10 +183,7 @@ class QePT():
             n_steps_between_exchange (int): Number of MCMC steps between replica exchange attempts
             
         Returns:
-            tuple: (swap_tracker, energies, current_states) where:
-                - swap_tracker (np.ndarray): Record of successful swaps between replicas
-                - energies (np.ndarray): Energy trajectories for all replicas
-                - current_states (list): Final states of all replicas
+            np.ndarray: current_states (list): Final states of all replicas
                 
 
         """        
@@ -188,7 +193,7 @@ class QePT():
         for i, mcmc in enumerate(self.mcmcs):
             mcmc.temp = temps[i]  # Assign temperature to each replica
             # Generate random initial state - Note: calling get_random_state twice may be inefficient
-            random_state = get_random_state(self.model.num_spins)
+            random_state = get_random_state(self.model.n_spins)
             initial_energy = mcmc.model.get_energy(random_state)
             current_states.append(MCMCState(random_state, True, initial_energy))
             #energies[i, 0] = current_states[i].energy

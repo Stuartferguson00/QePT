@@ -1,6 +1,6 @@
 import pickle
 from typing import List
-from qemcmc.energy_models import EnergyModel
+from qemcmc.model.energy_model import EnergyModel
 from pathlib import Path
 
 

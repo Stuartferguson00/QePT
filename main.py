@@ -11,16 +11,19 @@ warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 from tqdm import trange
 
+
+
 if __name__ == "__main__":
     dir_ = Path(__file__).resolve().parent
 
 
 
 
-    n_spin = 7
+    n_spin = 10
+    n_steps= 150
     m_replica = 4
-    m_quantum_replica = 2
-    repetitions = 2
+    m_quantum_replica = 0
+    repetitions = 100
     
     
     gamma = (0.25,0.6)
@@ -41,9 +44,9 @@ if __name__ == "__main__":
 
     high_temp = 10.0
     low_temp = 0.01
-    temps = np.logspace(high_temp, low_temp, m_replica)
+    temps = np.logspace(np.log10(high_temp), np.log10(low_temp), m_replica)
 
-    model = get_models(n_spin, models_path=dir_/'models')[0]
+    model = get_models(n_spin, models_path=dir_/'models')[1]
     
     model_lowest = model.lowest_energy
     optimal_energies_found = []
@@ -51,7 +54,7 @@ if __name__ == "__main__":
 
     for rep in trange(repetitions):
         replica_chains = QePT(model, proposals = ["local",]*(m_replica-m_quantum_replica) + ["qemcmc"]*m_quantum_replica, quantum_args_dict = quantum_args_dict)
-        current_states = replica_chains.run(n_steps = 100, temps = temps, n_steps_between_exchange = 10, verbose = True)
+        current_states = replica_chains.run(n_steps = n_steps, temps = temps, n_steps_between_exchange = 10, verbose = True)
         
         
         min_energy_found = np.min([model.get_energy(state.bitstring) for state in current_states])
