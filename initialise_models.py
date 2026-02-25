@@ -11,7 +11,7 @@ from classical_optimiser import Classical_Solver
 
 # Basic helper code to initialise a list Ising models of type required by cgqemcmc
 # Once created, Models are pickled so they can be easily accessed later.
-for n_spins in [7,]:#np.arange(4,20):
+for n_spins in [10,]:#np.arange(4,20):
 
     reps = 100
 
@@ -36,7 +36,6 @@ for n_spins in [7,]:#np.arange(4,20):
 
 
 
-        subgroups = list(itertools.combinations(range(n_spins), n_spins))
         shape_of_J = (n_spins, n_spins)
         J = np.round(np.random.normal(0, 1, shape_of_J), decimals=4)
         J_tril = np.tril(J, -1)
@@ -49,7 +48,7 @@ for n_spins in [7,]:#np.arange(4,20):
         # why does the user have to calculate their own alpha? At least we should do it in model maker. Ask the user to input max_number of qubits, and we enumerate all combinations internally.
         alpha = np.sqrt(n_spins) / np.sqrt(sum([J[i][j] ** 2 for i in range(n_spins) for j in range(i)]) + sum([h[j] ** 2 for j in range(n_spins)]))
 
-        model = qemcmc.EnergyModel(n=n_spins, couplings=couplings, subgroups=subgroups, subgroup_probs=np.ones(len(subgroups)) / len(subgroups), alpha=alpha)
+        model = qemcmc.EnergyModel(n=n_spins, couplings=couplings, alpha=alpha)
         # Gurobi broken for some reason
         #model.lowest_energy = Classical_Solver().solve(model)[0]
         models.append(model)

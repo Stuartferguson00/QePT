@@ -138,7 +138,7 @@ class QePT():
         if accepted:
             current_state = MCMCState(s_prime, accepted, energy_sprime)
             # Note: energy_s assignment below is redundant since we return current_state
-            energy_s = energy_sprime  # This line could be removed as optimization
+            energy_s = energy_sprime  
         return current_state
         
     def swap_accept(self, conf1: str, conf2: str, temp1: float, temp2: float) -> bool:
@@ -187,7 +187,7 @@ class QePT():
                 
 
         """        
-
+        
         # Initialize random starting configurations for all replicas
         current_states = []
         for i, mcmc in enumerate(self.mcmcs):
@@ -200,9 +200,9 @@ class QePT():
 
         #print("n_steps // n_steps_between_exchange:", n_steps // n_steps_between_exchange)
         n_steps_between_exchange = n_steps_between_exchange//2  # Adjust for odd-even exchange scheme
+        energy_history = np.zeros((self.m_replicas, 2*(n_steps // (n_steps_between_exchange))+2))  # To record energy history of each replica
         # Main parallel tempering loop
         for n in trange((n_steps // (n_steps_between_exchange))+1, desc="Running QePT", leave=False, disable = not verbose):
-
             # Update each replica in parallel for n_steps_between_exchange steps
             
             #updated_states = Parallel(n_jobs=-1)(
@@ -223,7 +223,7 @@ class QePT():
                     for i, mcmc in enumerate(self.mcmcs)
                 ]
             current_states = updated_states
-
+            energy_history[:, 2*(n+1)-2] = [state.energy for state in current_states]  # Record energy history after updates
             # Attempt replica exchanges in an odd-even manner
 
             
@@ -233,12 +233,14 @@ class QePT():
                     if self.swap_accept(current_states[i].bitstring, current_states[i + 1].bitstring, temps[i], temps[i + 1]):
                         current_states[i], current_states[i + 1] = current_states[i + 1], current_states[i]
                 #print(f"Completed (odd) exchange step {n+1}, at {(n+1) * n_steps_between_exchange + 1}")
+                energy_history[:, (2*(n+1))-1] = [state.energy for state in current_states]  # Record energy history after odd swaps
             else:
                 #Even swaps
                 for i in range(0, self.m_replicas - 1, 2):  # Even pairs
                     if self.swap_accept(current_states[i].bitstring, current_states[i + 1].bitstring, temps[i], temps[i + 1]):
                         current_states[i], current_states[i + 1] = current_states[i + 1], current_states[i]
                 #print(f"Completed (even) exchange step {n+1}, at {(n+1) * n_steps_between_exchange + 1}")
+                energy_history[:, (2*(n+1))-1] = [state.energy for state in current_states]  # Record energy history after even swaps
 
 
-        return current_states
+        return current_states, energy_history

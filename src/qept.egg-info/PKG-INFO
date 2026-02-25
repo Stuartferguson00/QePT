@@ -6,6 +6,7 @@ Requires-Python: >=3.13
 Description-Content-Type: text/markdown
 Requires-Dist: cmake>=4.2.1
 Requires-Dist: gurobipy>=13.0.1
+Requires-Dist: pennylane>=0.44.0
 Requires-Dist: qemcmc
 
 # Quantum-enhanced Parallel Tempering Simulator
