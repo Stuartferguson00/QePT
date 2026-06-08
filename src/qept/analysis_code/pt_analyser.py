@@ -1,14 +1,10 @@
-import os
 import pickle
 import numpy as np
 import joblib
 from skopt.space import Real
 from typing import List, Dict, Any, Optional, Union, Tuple
-from abc import ABC, abstractmethod
 from pathlib import Path
 from qemcmc import EnergyModel
-#from qemcmc.energy_model import EnergyModel
-from qept.analysis_code.optimizer import Optimizer
 from qept.qept import QePT
 from qept.utils import get_effort_p
 import qept.analysis_code.config as config
@@ -101,9 +97,9 @@ class PTParamAnalyzer():
         results_dir.mkdir(exist_ok=True)
         results_dir = results_dir / f"opt_results"
         results_dir.mkdir(exist_ok=True)
-        if self.tag == "PT" or self.tag == "PT_gridsearch":
+        if self.tag == "PT":
             # Build a tag string for replicas, e.g., "lll", "llq"
-            
+    
             replica_tag = ""
             for proposal in self.proposals:
                 replica_tag += proposal[0]
