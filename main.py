@@ -47,7 +47,7 @@ if __name__ == "__main__":
     low_temp = 0.01
     temps = np.logspace(np.log10(high_temp), np.log10(low_temp), m_replica)
 
-    #pick a random integer, represeni=ting a model, between 0 and 100
+    #pick a random integer, representing a model, between 0 and 100
     
     model_index = np.random.randint(0, 100)
     model = get_models(n_spin, models_path=dir_/'models')[model_index]

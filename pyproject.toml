@@ -9,6 +9,7 @@ dependencies = [
     "gurobipy>=13.0.1",
     "pennylane>=0.44.0",
     "qemcmc",
+    "scikit-optimize>=0.10.2",
 ]
 
 [tool.uv.sources]

@@ -22,10 +22,10 @@ class Classical_Solver:
 
         # Objective: Ising Hamiltonian
         ising_expr = gp.quicksum(
-            -model.couplings[1][i, j] * 0.5 * (2 * spins[i] - 1) * (2 * spins[j] - 1)
+            -model.couplings[2][i, j] * (2 * spins[i] - 1) * (2 * spins[j] - 1)
             for i in range(n_spins) for j in range(n_spins)
         ) + gp.quicksum(
-            -model.couplings[0][i] * (2 * spins[i] - 1)
+            -model.couplings[1][i] * (2 * spins[i] - 1)
             for i in range(n_spins)
         )
 
@@ -37,7 +37,7 @@ class Classical_Solver:
         optimal_value = m.objVal
         spin_configuration = [int(spins[i].X) for i in range(n_spins)]
 
-        self.print_results(optimal_value, spin_configuration)
+        #self.print_results(optimal_value, spin_configuration)
         
         return optimal_value, spin_configuration
     
@@ -70,6 +70,6 @@ class Classical_Solver:
 
         ground_state = all_energies[min_energy_arg]
         ground_state = model.get_lowest_energies(1)[0]
-
+        #self.print_results(ground_state, ground_state_bitstring)
         return ground_state, ground_state_bitstring
 
