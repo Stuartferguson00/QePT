@@ -201,11 +201,12 @@ class QePT(Runner):
                     gamma = quantum_args_dict['gamma']
                     time = quantum_args_dict['time']
                     delta_time = quantum_args_dict.get('delta_time', 0.8)  # Default to 0.8 if not provided
+                    m = quantum_args_dict.get('m', 1)  # Default to 1 if not provided
                 except KeyError as e:
                     raise ValueError(f"Missing required quantum argument: {e}")
                 except TypeError:
                     raise ValueError("quantum_args_dict must be provided for 'qemcmc' proposals")
-                proposal = QeProposal(model, gamma, time, None, delta_time)
+                proposal = QeProposal(model, gamma, time, None, delta_time, m = m)
                 mcmc_runner =  MCMCRunnerAlt(model, np.nan, proposal)
                 #print("sample_sizes: ", self.sample_sizes)  # Debug output (commented)
             else:

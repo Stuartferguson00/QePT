@@ -27,7 +27,7 @@ def main():
 
 
     
-    quantum_args_dict = {'gamma': (0.25, 0.6), 'time': (2, 20), 'delta_time': 0.8}
+    quantum_args_dict = {'gamma': (0.25, 0.6), 'time': (2, 20), 'delta_time': 0.8, "m":2}
 
     n_hops = 100
     n_steps_between_exchange = 10

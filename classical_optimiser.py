@@ -19,15 +19,23 @@ class Classical_Solver:
 
         # Create variables
         spins = m.addVars(n_spins, vtype=gp.GRB.BINARY, name='spins')
+        
+        # ising_expr = gp.quicksum(
+        #     -model.couplings[1][i, j] * (2 * spins[i] - 1) * (2 * spins[j] - 1)
+        #     for i in range(n_spins) for j in range(n_spins)
+        # ) + gp.quicksum(
+        #     -model.couplings[0][i] * (2 * spins[i] - 1)
+        #     for i in range(n_spins)
+        # )
 
-        # Objective: Ising Hamiltonian
         ising_expr = gp.quicksum(
-            -model.couplings[2][i, j] * (2 * spins[i] - 1) * (2 * spins[j] - 1)
-            for i in range(n_spins) for j in range(n_spins)
-        ) + gp.quicksum(
-            -model.couplings[1][i] * (2 * spins[i] - 1)
-            for i in range(n_spins)
-        )
+                -coeff * (2 * spins[u] - 1) * (2 * spins[v] - 1)
+                for variables, coeff in model.couplings[1].items()
+                for u, v in [tuple(variables)]  # Unpacks the variable tuple/frozenset safely
+            ) + gp.quicksum(
+                -coeff * (2 * spins[tuple(variables)[0]] - 1)
+                for variables, coeff in model.couplings[0].items()
+            )
 
         m.setObjective(ising_expr, gp.GRB.MINIMIZE)
         m.setParam('OutputFlag', 0)
