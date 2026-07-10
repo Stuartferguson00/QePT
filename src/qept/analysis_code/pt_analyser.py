@@ -22,6 +22,7 @@ class PTParamAnalyzer():
         self.models = models
 
         self.savers = []
+        self.results_dict = {}
 
         self.m = quantum_args_dict["m"] if quantum_args_dict is not None and "m" in quantum_args_dict else 1
         self.m_replicas = m_replicas
@@ -69,7 +70,7 @@ class PTParamAnalyzer():
             optimal_efforts.append(x_best)
         
         # save results
-        results_dict = {
+        self.results_dict = {
             "optimal_nhops": [int(x) for x in optimal_params],
             "mean_optimal_nhops": float(np.mean(optimal_params, axis=0)),
             "sem_optimal_nhops": float(np.std(optimal_params, axis=0, ddof=1) / np.sqrt(len(optimal_params))),
@@ -82,8 +83,8 @@ class PTParamAnalyzer():
             "data_save": np.array(self.savers),
         }
         if hasattr(self, "tag") and self.tag == "PT":
-            results_dict["m_replicas"] = self.m_replicas
-        self.save_results(results_dict)
+            self.results_dict["m_replicas"] = self.m_replicas
+        self.save_results(self.results_dict)
         
         
         return np.array(optimal_params), np.array(optimal_efforts), np.array(self.savers)
@@ -135,7 +136,7 @@ class PTParamAnalyzer():
     def run_effort_calc(self, model: Any, params: List, reps_overide:int = None) -> float:
         n_hops = int(np.exp(params[0]))
         temps = np.logspace(np.log10(config.HIGH_TEMP), np.log10(config.LOW_TEMP), self.m_replicas)
-        n_steps_between_exchange = model.n_spins
+        n_steps_between_exchange = 2#model.n_spins
         
         if reps_overide is not None:
             reps = reps_overide
@@ -211,4 +212,3 @@ class PTParamAnalyzer():
         final_energy = current_states[np.argmin(temps)].energy
 
         return final_energy, energy_history
-
