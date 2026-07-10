@@ -199,10 +199,16 @@ class PTParamAnalyzer():
         else:
             proposals = proposals
         PT = QePT(model, proposals, quantum_args_dict=quantum_args_dict)
-        current_states, energy_history = PT.run(n_hops, temps, n_steps_between_exchange=n_steps_between_exchange, verbose = False)
+        current_states, energy_history = PT.run(n_hops, temps, n_steps_between_exchange=n_steps_between_exchange, verbose = False, early_stop_energy = model.lowest_energy)
+        
+        
+        # if energy_history is ending in Zeros, early stopping has occured, so pad results
+        early_stop_point = energy_history.shape[1] - np.sum(energy_history[-1] == 0)
+        if early_stop_point < energy_history.shape[1]:
+            energy_history[-1,early_stop_point:] = energy_history[-1,early_stop_point-1]
+
         #energies = [cs.energy for cs in current_states]
         final_energy = current_states[np.argmin(temps)].energy
 
-        #return np.min(energies)
         return final_energy, energy_history
 

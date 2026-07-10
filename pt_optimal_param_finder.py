@@ -7,14 +7,14 @@ from pathlib import Path
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 from qemcmc.coarse_grain import CoarseGraining
-    
+import numpy as np
 
 if __name__ == "__main__":
     num_models = 5  # Number of models to optimize
     dir_ = Path(__file__).resolve().parent
-    n_spins = [4,6,8,10,12,14,16,18,20,24]
+    n_spins = np.arange(4,20)#[4,6,8,10,12,14,16,18,20,24]
     m_replicas = [4,]#, 11, 12, 13, 14, 15]
-    m_quantum_replicas = [1,]#[1,1,1,1,2,2,2,2]
+    m_quantum_replicas = [0,]#[1,1,1,1,2,2,2,2]
     m = 2
     for m_idx, m_replica in tqdm(list(enumerate(m_replicas)), desc="m_replicas"):
         m_quantum_replica = m_quantum_replicas[m_idx]

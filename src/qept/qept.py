@@ -266,7 +266,7 @@ class QePT(Runner):
         # Apply Metropolis criterion for replica exchange
         return np.exp(delta) > np.random.uniform(0, 1)
     
-    def run(self, n_steps: int, temps: np.ndarray, n_steps_between_exchange: int, verbose: bool = False) -> np.ndarray:  # Fixed return type
+    def run(self, n_steps: int, temps: np.ndarray, n_steps_between_exchange: int, verbose: bool = False, early_stop_energy = None) -> np.ndarray:  # Fixed return type
         """
         Execute the complete QePT algorithm for the specified number of steps.
         
@@ -281,13 +281,18 @@ class QePT(Runner):
             n_steps (int): Total number of MCMC steps to perform
             temps (np.ndarray): Array of temperatures for each replica (must match m_replicas)
             n_steps_between_exchange (int): Number of MCMC steps between replica exchange attempts
-            
+            early_stop_energy (float): If lowest energy is known, provide it to stop the algorithm early.
         Returns:
             np.ndarray: current_states (list): Final states of all replicas
             np.ndarray: energy_history: Recorded energy history for all replicas across all steps (number of replicas x n_steps)
                 
 
         """        
+        
+        if early_stop_energy is not None:
+            if not isinstance(early_stop_energy, float):
+                raise TypeError("early_stop_energy must be a float, instead got: "+str(early_stop_energy) + " of type: "+str(type(early_stop_energy)))
+        
         self.energy_history = np.zeros((self.m_replicas, n_steps+1)) # Initialize energy history array to record energies at each step for all replicas
         # Initialize random starting configurations for all replicas
         current_states = []
@@ -343,5 +348,14 @@ class QePT(Runner):
                 #energy_history[:, n] = [state.energy for state in current_states]  # Record energy history after even swaps
             #energy_history[:, n] = [state.energy for state in current_states]  # Record energy history after updates
             
+
+
+            if early_stop_energy is not None:
+                
+                # if any of the lowest temperature chain values are below the threshold, early stop.
+                if np.any(self.energy_history[-1,:] <= early_stop_energy):
+                    return current_states, self.energy_history
+                    
+
 
         return current_states, self.energy_history
