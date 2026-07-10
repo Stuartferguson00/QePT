@@ -14,7 +14,7 @@ import time
 
 # Basic helper code to initialise a list Ising models of type required by cgqemcmc
 # Once created, Models are pickled so they can be easily accessed later.
-for n_spins in [4,5,6,7,8,9,10,15,20,25,30]:#np.arange(4,20):
+for n_spins in [14,]:#np.arange(4,20):
 
     reps = 100
 
@@ -41,9 +41,6 @@ for n_spins in [4,5,6,7,8,9,10,15,20,25,30]:#np.arange(4,20):
         model.lowest_energy = Classical_Solver().solve(model)[0]
         #model.lowest_energy = Classical_Solver().solve_brute(model)[0][0]
 
-        
-
-        
     print("saving models to: ", model_dir)
 
     fileObj = open(model_dir, 'wb')

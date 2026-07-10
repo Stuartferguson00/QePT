@@ -22,7 +22,7 @@ from qemcmc.sampler.runners import Runner, MCMCRunner
 from qemcmc.sampler.qe_proposal import QeProposal
 from qemcmc.sampler.proposal import Proposal
 from qemcmc.sampler.classical_proposal import ClassicalProposal
-
+from qemcmc.coarse_grain import CoarseGraining
 from typing import List, Dict, Optional
 import numpy as np
 from tqdm import trange
@@ -180,6 +180,7 @@ class QePT(Runner):
             ValueError: If invalid proposal method is specified or required quantum
                         arguments are missing for QeMCMC replicas.
         """
+        
         self.model = model
         self.m_replicas = len(proposals)
         
@@ -206,7 +207,8 @@ class QePT(Runner):
                     raise ValueError(f"Missing required quantum argument: {e}")
                 except TypeError:
                     raise ValueError("quantum_args_dict must be provided for 'qemcmc' proposals")
-                proposal = QeProposal(model, gamma, time, None, delta_time, m = m)
+                cg = CoarseGraining(model.n_spins, repeated  = False)
+                proposal = QeProposal(model, gamma, time, None, delta_time, m = m, coarse_graining = cg)
                 mcmc_runner =  MCMCRunnerAlt(model, np.nan, proposal)
                 #print("sample_sizes: ", self.sample_sizes)  # Debug output (commented)
             else:

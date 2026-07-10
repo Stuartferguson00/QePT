@@ -9,7 +9,7 @@ def main():
     """
     Example script to calculate the spectral gap of a Parallel Tempering chain.
     """
-    n_spins = 10
+    n_spins = 6
 
     try:
         models = get_models(n_spins, Path(__file__).resolve().parent/"models")
@@ -27,7 +27,7 @@ def main():
 
 
     
-    quantum_args_dict = {'gamma': (0.25, 0.6), 'time': (2, 20), 'delta_time': 0.8, "m":2}
+    quantum_args_dict = {'gamma': (0.25, 0.6), 'time': (2, 20), 'delta_time': 0.8, "m":3}
 
     n_hops = 100
     n_steps_between_exchange = 10

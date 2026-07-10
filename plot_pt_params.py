@@ -8,7 +8,7 @@ import matplotlib.cm as cm
 from pathlib import Path
 
 
-def load_pt_results(n_spins_list, m_replicas_list, results_dir, proposals_list):
+def load_pt_results(n_spins_list, m_replicas_list, results_dir, proposals_list, m):
     """
     Load the results from the parallel tempering experiments.
     """
@@ -40,7 +40,7 @@ def load_pt_results(n_spins_list, m_replicas_list, results_dir, proposals_list):
                 if replica_tag == "l"*len(proposals):
                     res_path = results_dir / f"{str(n_spins).zfill(3)}_{m_replicas}.pkl"
                 else:
-                    res_path = results_dir / f"{str(n_spins).zfill(3)}_{m_replicas}_{replica_tag}.pkl"
+                    res_path = results_dir / f"{str(n_spins).zfill(3)}_{m_replicas}_{replica_tag}_{m}.pkl"
                                     
                 
                 try:
@@ -67,12 +67,12 @@ def load_pt_results(n_spins_list, m_replicas_list, results_dir, proposals_list):
     
 #return optimal_nhops, sem_optimal_nhops, optimal_efforts, sem_optimal_efforts
 
-def main(results_dir, results_path,n_spins_list,m_replicas_list):
+def main(results_dir, results_path,n_spins_list,m_replicas_list, m):
     """
     Main function to generate and save the plots.
     """
     # Get PT results
-    pt_nhops, pt_sem_nhops, pt_efforts, pt_sem_efforts = load_pt_results(n_spins_list, m_replicas_list, results_dir)
+    pt_nhops, pt_sem_nhops, pt_efforts, pt_sem_efforts = load_pt_results(n_spins_list, m_replicas_list, results_dir, m)
 
 
   
@@ -133,10 +133,10 @@ def plot_optimal_m_replicas(pt_efforts, pt_sem_efforts):
     #print(pt_nhops, pt_sem_nhops, pt_efforts, pt_sem_efforts)
     plt.figure(figsize=(6, 4))
     cmap = plt.get_cmap('viridis', len(m_replicas_list))
-    for i, m in enumerate(m_replicas_list):
+    for i, m_replicas in enumerate(m_replicas_list):
         print("m_replicas_list:", m_replicas_list)
-        print("np.where(m_replicas_list == m)",np.where(m_replicas_list == m))
-        idx_m = np.where(m_replicas_list == m)[0][0]
+        print("np.where(m_replicas_list == m_replicas)",np.where(m_replicas_list == m_replicas))
+        idx_m = np.where(m_replicas_list == m_replicas)[0][0]
         try:
             color = cmap(i / (len(m_replicas_list) - 1))
         except:
@@ -160,7 +160,7 @@ def plot_optimal_m_replicas(pt_efforts, pt_sem_efforts):
             except Exception:
                 pass
         else:
-            print("Not enough data points to fit for m_replicas =", m)
+            print("Not enough data points to fit for m_replicas =", m_replicas)
     plt.yscale('log')
     plt.xlabel('n_spins')
     plt.ylabel('Optimal efforts')
@@ -170,13 +170,13 @@ def plot_optimal_m_replicas(pt_efforts, pt_sem_efforts):
     plt.savefig(results_path / 'fig_optimal_efforts_mreplicas.png')
     
     
-def plot_optimal_effort_n_spins_m_const(pt_efforts, pt_sem_efforts, m, n_spins_list, m_replicas_list, m_quantum_replicas_list):
+def plot_optimal_effort_n_spins_m_const(pt_efforts, pt_sem_efforts, m_replicas_const, n_spins_list, m_replicas_list, m_quantum_replicas_list):
     #print(pt_nhops, pt_sem_nhops, pt_efforts, pt_sem_efforts)
     plt.figure(figsize=(6, 4))
     
     cmap = plt.get_cmap('viridis', len(m_quantum_replicas_list))
         
-    idx_m = np.where(np.isclose(m_replicas_list,m))[0][0]
+    idx_m = np.where(np.isclose(m_replicas_list,m_replicas_const))[0][0]
     for idx_m_q, m_q in enumerate(m_quantum_replicas_list):
         
         #idx_m_q = np.where(np.isclose(m_quantum_replicas_list,m_q))[0][0]
@@ -204,17 +204,17 @@ def plot_optimal_effort_n_spins_m_const(pt_efforts, pt_sem_efforts, m, n_spins_l
             except Exception:
                 pass
         else:
-            print("Not enough data points to fit for m_replicas =", m)
+            print("Not enough data points to fit for m_q =", m_q)
         
     
     
     plt.yscale('log')
     plt.xlabel('n_spins')
     plt.ylabel('Optimal efforts')
-    plt.title('Optimal efforts for '+str(m)+" replicas")
+    plt.title('Optimal efforts for '+str(m_replicas_const)+" replicas")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(results_path / ('fig_optimal_efforts_vs_n_spins_m_'+str(m)+'.png'))
+    plt.savefig(results_path / ('fig_optimal_efforts_vs_n_spins_m_'+str(m_q)+"_"+str(m_replicas_const)+'.png'))
 
 
 
@@ -263,7 +263,7 @@ def plot_effort_vs_nhops(n_spins_list, m_replicas_list, m_quantum_replicas_list,
                 # selected_indices = np.arange(start_idx, end_idx)
 
                 # Get indices of the 0 lowest mean_nhops
-                selected_indices = np.argsort(mean_nhops)[:20]
+                selected_indices = np.argsort(mean_nhops)[:10]
                 if 0 in selected_indices:
                     selected_indices = np.delete(selected_indices, np.where(selected_indices == 0)) 
                 x_fit = unique_efforts[selected_indices]
@@ -343,7 +343,7 @@ def plot_effort_vs_nhops(n_spins_list, m_replicas_list, m_quantum_replicas_list,
                 ax.set_yscale( "log")
                 ax.set_ylabel('Effort')
                 ax.set_xlabel('Number of Hops')
-                ax.set_title(f'Effort vs Hops for {n_spins_to_plot} Spins, m={m_replica}')
+                ax.set_title(f'Effort vs Hops for {n_spins_to_plot} Spins, m_replica={m_replica}')
                 
                 # Force the y-axis to be 10% larger than the data points only
                 #padding = (np.max(data) - np.min(data)) * 0.1
@@ -388,11 +388,11 @@ def plot_effort_vs_nhops(n_spins_list, m_replicas_list, m_quantum_replicas_list,
         for j, m_quantum_replica in enumerate(m_quantum_replicas_list):
             colour = cmap(i * len(m_quantum_replicas_list) + j)
             ax2.errorbar(spins_to_plot, x_mins[:, i, j, 0], yerr=x_mins[:, i, j, 1],
-                         label=f'$M_q={m_quantum_replica}$', marker=markerslist[j], markersize=markersizelist[j], linewidth = 0.6, color = colour)
+                         label=f'$M_q={m_quantum_replica}, M={m_replica}$', marker=markerslist[j], markersize=markersizelist[j], linewidth = 0.6, color = colour)
     
     ax2.set_xlabel('Number of Spins')
     ax2.set_ylabel('Optimal number of steps')
-    ax2.set_title('Scaling of optimal number of steps for (Qe)PT | $M = 4$')
+    ax2.set_title(f'Scaling of optimal number of steps for (Qe)PT | $m = {m}$')
     ax2.legend()
     # ax2.set_yscale('log')
 
@@ -404,7 +404,7 @@ def plot_effort_vs_nhops(n_spins_list, m_replicas_list, m_quantum_replicas_list,
                          label=f'$M_q$={m_quantum_replica}', marker=markerslist[j],  linewidth = 0.6, color=colour, markersize=markersizelist[j])
     ax3.set_xlabel('Number of spins')
     ax3.set_ylabel('Optimal effort')
-    ax3.set_title('Optimal effort vs number of spins | $M = 4$')
+    ax3.set_title(f'Optimal effort vs number of spins | $m = {m}$')
     ax3.legend()
     ax3.set_yscale('log')
 
@@ -412,7 +412,7 @@ def plot_effort_vs_nhops(n_spins_list, m_replicas_list, m_quantum_replicas_list,
     fig2.savefig(output_dir / 'PT_nhops_vs_n.png')
     plt.close(fig2)
     fig3.tight_layout()
-    fig3.savefig(output_dir / 'PT_optimal_effort_vs_n_spins.png')
+    fig3.savefig(output_dir / f'PT_optimal_effort_vs_n_spins_m_{m}.png')
     plt.close(fig3)
 
     # save x_mins to pickle
@@ -451,7 +451,7 @@ def plot_hops_vs_probability(n_spins_list, m_replicas_list, m_quantum_replicas_l
                     nhops = data[:, 0]
                     probs = data[:, 3]
 
-                    label = f'm={m_replica}, m_q={m_quantum_replica}'
+                    label = f'm_replica={m_replica}, m_q={m_quantum_replica}'
                     unique_nhops = np.unique(nhops)
                     mean_probs = []
                     sem_probs = []
@@ -470,7 +470,7 @@ def plot_hops_vs_probability(n_spins_list, m_replicas_list, m_quantum_replicas_l
                 ax.set_yscale("log")
                 ax.set_ylabel('probs')
                 ax.set_xlabel('Number of Hops')
-                ax.set_title(f'{n_spins_to_plot} Spins, m={m_replica}, m_q={m_quantum_replica}')
+                ax.set_title(f'{n_spins_to_plot} Spins, m_replica={m_replica}, m_q={m_quantum_replica}')
                 
 
                 count+=1
@@ -495,9 +495,10 @@ if __name__ == "__main__":
     print(results_dir)
     results_path = dir_ / "plots_PT"
     results_path.mkdir(parents=True, exist_ok=True)
-    n_spins_list = [5,6,7,8,9,10]#20,25,30]#[8,9,10,11,12,13,14,15,16,17,18,19,20,25,30,35]
+    n_spins_list = [5,6,7,8,9,10,12,15,20]
     m_replicas_list = [4,]#np.arange(2,17)
     m_quantum_replicas_list = [0,1]#,1,2]
+    m = 2
     proposals_list = [["local",]*(m_replicas_list[i]-m_quantum_replicas_list[j]) + ["qemcmc"]*m_quantum_replicas_list[j] for i in range(len(m_replicas_list)) for j in range(len(m_quantum_replicas_list))]
 
     print("n_spins_list:", n_spins_list)
@@ -513,6 +514,6 @@ if __name__ == "__main__":
     
     cmap = plt.get_cmap('inferno', len(m_replicas_list) * len(m_quantum_replicas_list)+2)
 
-    results = load_pt_results(n_spins_list, m_replicas_list, results_dir, proposals_list=proposals_list)
+    results = load_pt_results(n_spins_list, m_replicas_list, results_dir, proposals_list=proposals_list, m = m)
     plot_effort_vs_nhops(n_spins_list, m_replicas_list, m_quantum_replicas_list , results, results_path, "", cmap)
     plot_hops_vs_probability(n_spins_list, m_replicas_list, m_quantum_replicas_list, results, results_path, "lightgreen")

@@ -23,7 +23,7 @@ class PTParamAnalyzer():
 
         self.savers = []
 
-
+        self.m = quantum_args_dict["m"] if quantum_args_dict is not None and "m" in quantum_args_dict else 1
         self.m_replicas = m_replicas
         self.tag = "PT"
         self.quantum_args_dict = quantum_args_dict
@@ -106,7 +106,7 @@ class PTParamAnalyzer():
             if replica_tag == "l"*len(self.proposals):
                 res_path = results_dir / f"{str(self.n_spins).zfill(3)}_{self.m_replicas}.pkl"
             else:
-                res_path = results_dir / f"{str(self.n_spins).zfill(3)}_{self.m_replicas}_{replica_tag}.pkl"
+                res_path = results_dir / f"{str(self.n_spins).zfill(3)}_{self.m_replicas}_{replica_tag}_{self.m}.pkl"
         else:
             res_path = results_dir / f"{str(self.n_spins).zfill(3)}.pkl"
         res_path = res_path.resolve()
