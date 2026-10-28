@@ -7,3 +7,5 @@ src/qept.egg-info/SOURCES.txt
 src/qept.egg-info/dependency_links.txt
 src/qept.egg-info/requires.txt
 src/qept.egg-info/top_level.txt
+src/qept/analysis_code/config.py
+src/qept/analysis_code/pt_analyser.py

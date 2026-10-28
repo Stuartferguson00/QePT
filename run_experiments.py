@@ -32,12 +32,12 @@ if __name__ == "__main__":
 
     # --- Simulation Parameters ---
     # These can be adjusted as in the original script
-    num_models = 5  # Number of models to optimize
+    num_models = 100  # Number of models to optimize
     dir_ = Path(__file__).resolve().parent
-    n_spins_list = [12,14,16,18,20]#np.arange(4,6,1) # Using a smaller range for demonstration
+    n_spins_list = [9,]#np.arange(6,18,3) 
     m_replicas_list = [4]
-    m_quantum_replicas_list = [2]
-    m_cg_list = [2] # Coarse graining factor
+    m_quantum_replicas_list = [4]
+    m_cg_list = [1] # Coarse graining factor
 
     print("Starting new simulation runs...")
     # --- Main Simulation Loop ---
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     for n_spin in tqdm(n_spins_list, desc="n_spins"):
         for m_replica in tqdm(m_replicas_list, desc="m_replicas", leave=False):
             for m_quantum_replica in tqdm(m_quantum_replicas_list, desc="m_quantum_replicas", leave=False):
-                if m_quantum_replica >= m_replica:
+                if m_quantum_replica > m_replica:
                     continue # Skip cases where quantum replicas are more than total replicas
 
                 # Define parameters for the run

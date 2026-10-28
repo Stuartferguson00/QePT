@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: qept
-Version: 0.1.0
+Version: 0.1.1
 Summary: Add your description here
 Requires-Python: >=3.13
 Description-Content-Type: text/markdown
@@ -8,6 +8,8 @@ Requires-Dist: cmake>=4.2.1
 Requires-Dist: gurobipy>=13.0.1
 Requires-Dist: pennylane>=0.44.0
 Requires-Dist: qemcmc
+Requires-Dist: scikit-optimize>=0.10.2
+Requires-Dist: tinydb>=4.8.2
 
 # Quantum-enhanced Parallel Tempering Simulator
 

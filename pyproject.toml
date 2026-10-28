@@ -10,7 +10,15 @@ dependencies = [
     "pennylane>=0.44.0",
     "qemcmc",
     "scikit-optimize>=0.10.2",
+    "seaborn>=0.13.2",
+    "tinydb>=4.8.2",
 ]
 
 [tool.uv.sources]
-qemcmc = { git = "https://github.com/Stuartferguson00/QeMCMC" }
+qept = { workspace = true }
+qemcmc = { git = "https://github.com/Stuartferguson00/QeMCMC", rev = "3bf1fd51a79edee478dcfcbf4977620ebc97c213" }
+
+[dependency-groups]
+dev = [
+    "qept",
+]

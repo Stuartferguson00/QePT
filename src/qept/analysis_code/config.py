@@ -52,5 +52,5 @@ def get_pt_search_space(n_spins: int) -> tuple[int, int]:
     elif 25 <= n_spins <= 30:
         return 25, 1000
     elif n_spins > 30:
-        return 30, 2000
+        return 30, 1000
     return 3, 100  # Default

@@ -57,7 +57,7 @@ class PTParamAnalyzer():
         optimal_efforts = []
 
         # loop through models
-        for model in tqdm(self.models[0:num_models], desc="Models"):
+        for model in tqdm(self.models[0:num_models], desc="Models",miniters = 20):
         
             highest_hops = self.get_search_space()[0].high
             
@@ -152,7 +152,7 @@ class PTParamAnalyzer():
         result_list = list(tqdm(
             joblib.Parallel(n_jobs=-2, return_as="generator")(jobs), 
             total=reps,
-            desc="PT Iterations"
+            desc="PT Iterations", disable = True
             ))
         
         # result_list = joblib.Parallel(n_jobs=-2)(
