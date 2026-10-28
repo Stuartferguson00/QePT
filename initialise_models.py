@@ -14,15 +14,7 @@ import time
 
 # Basic helper code to initialise a list Ising models of type required by cgqemcmc
 # Once created, Models are pickled so they can be easily accessed later.
-<<<<<<< HEAD
-<<<<<<< HEAD
-for n_spins in [11,13,17,19]:#np.arange(4,20):
-=======
-for n_spins in [50]:#np.arange(4,20):
->>>>>>> 5f9d5b9aa35733bc0d084e6cbe5f414ae73849d2
-=======
-for n_spins in [50]:#np.arange(4,20):
->>>>>>> 5f9d5b9aa35733bc0d084e6cbe5f414ae73849d2
+for n_spins in [14,]:#np.arange(4,20):
 
     reps = 100
 
