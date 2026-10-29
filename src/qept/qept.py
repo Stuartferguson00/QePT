@@ -4,25 +4,23 @@ Quantum-Enhanced Parallel Tempering (QePT) Implementation
 This module implements a parallel tempering algorithm that can utilize quantum-enhanced
 MCMC (QeMCMC) alongside classical MCMC methods for enhanced sampling of glassy boltzmann distribtuions. 
 Primarilty built for optimisation, but can easily be refactored for sampling applications. 
+
+Author: Stuart Ferguson
+Date: 2026
+Dependencies: qemcmc 0.6.0
 """
 
-# from qemcmc.MCMC import MCMC
-# from qemcmc.QeMCMC_ import QeMCMC
-# from qemcmc.ClassicalMCMC import ClassicalMCMC
-# from qemcmc.helpers import get_random_state
-# from qemcmc.helpers import MCMCState 
-# from qemcmc.energy_models import EnergyModel
 
+import qemcmc as qemcmc
 from qemcmc.model.energy_model import EnergyModel
-from qemcmc.sampler.qe_mcmc import QeMCMC
-from qemcmc.sampler.mcmc import MCMC
-from qemcmc.sampler.classical_mcmc import ClassicalMCMC
+from qemcmc.sampler import proposal
+from qemcmc.sampler.runners import MCMCRunner
 from qemcmc.utils.helpers import get_random_state
 from qemcmc.utils.helpers import MCMCState, MCMCChain
-
-from typing import List, Dict
 import numpy as np
+from tqdm import tqdm
 from tqdm import trange
+
 
 
 class QePT():
@@ -34,60 +32,23 @@ class QePT():
     MCMC (QeMCMC) methods. Different replicas can use different proposal mechanisms.
     
     """
-    def __init__(self,  model:EnergyModel, proposals:List[str], quantum_args_dict: Dict = None):
+    def __init__(self,  model:EnergyModel, proposals:list[proposal]):
         """
         Initialize the QePT algorithm with specified model and proposal methods.
         
         Args:
-            model: The energy model to be sampled. Must have methods:
-                    - get_energy(state): Return energy of a given state
-                    - num_spins: Number of spins/variables in the system
-            proposals (list): List of proposal method strings for each replica.
-                    Valid options: 'local', 'uniform', 'qemcmc'
-            quantum_args_dict (dict, optional): Dictionary containing quantum MCMC parameters.
-                    Required keys for 'qemcmc' proposals:
-                    - 'gamma': Quantum parameter
-                    - 'time': Evolution time parameter
-                    Optional keys:
-                    - 'delta_time': Time step (default: 0.8)
+            model: The energy model to be sampled.
+            proposals (list): List of qemcmc.proposal objects
+
         
-        Raises:
-            ValueError: If invalid proposal method is specified or required quantum
-                        arguments are missing for QeMCMC replicas.
+
         """
         self.model = model
         self.m_replicas = len(proposals)
-        
-        # Initialize MCMC objects for each replica based on proposal method
-        mcmcs = []
-        for proposal in proposals:
-            if proposal == "local":
-                # Classical MCMC with local proposal (single spin flip)
-                mcmc = ClassicalMCMC( model, np.nan, proposal)  # Explicitly call classical MCMC's __init__
-            elif proposal == "uniform":
-                # Classical MCMC with uniform proposal
-                mcmc = ClassicalMCMC( model, np.nan, proposal)
-            elif proposal == "qemcmc":
-                # Quantum-enhanced MCMC - requires additional parameters
-                try:
-                    gamma = quantum_args_dict['gamma']
-                    time = quantum_args_dict['time']
-                    delta_time = quantum_args_dict.get('delta_time', 0.8)  # Default to 0.8 if not provided
-                except KeyError as e:
-                    raise ValueError(f"Missing required quantum argument: {e}")
-                except TypeError:
-                    raise ValueError("quantum_args_dict must be provided for 'qemcmc' proposals")
-                
-                mcmc = QeMCMC(model, gamma, time, np.nan, delta_time)
-                self.update = mcmc.get_s_prime  # Store update function reference
-                #print("sample_sizes: ", self.sample_sizes)  # Debug output (commented)
-            else:
-                raise ValueError(f"Invalid proposal method: {proposal}. Choose from 'local', 'uniform', 'qemcmc'")
-            mcmcs.append(mcmc)
+        self.proposals = proposals
 
-        self.mcmcs = mcmcs
 
-    def update_n(self, mcmc: MCMC, current_state: MCMCState, n: int) -> MCMCState:
+    def update_n(self, proposal: proposal, runner: MCMCRunner, current_state: MCMCState, n: int) -> MCMCState:
         """
         Perform n MCMC update steps on a single replica.
         
@@ -95,7 +56,8 @@ class QePT():
         to evolve the current state of a replica.
         
         Args:
-            mcmc (MCMC): The MCMC object for this replica
+            proposal (proposal): the proposal mechanism
+            runner (runner:MCMCRunner): the mcmc runner, providing acces to temp
             current_state (MCMCState): Current state of the replica
             n (int): Number of update steps to perform
             
@@ -103,10 +65,10 @@ class QePT():
             MCMCState: The updated state after n steps
         """
         for m in range(n):
-            current_state = self.update_once(mcmc, current_state)
+            current_state = self.update_once(proposal, runner, current_state)
         return current_state
 
-    def update_once(self, mcmc: MCMC, current_state: MCMCState) -> MCMCState: 
+    def update_once(self, proposal: proposal, runner:MCMCRunner, current_state: MCMCState) -> MCMCState: 
         """
         Perform a single MCMC update step.
         
@@ -117,9 +79,9 @@ class QePT():
         4. Update the current state if accepted
         
         Args:
-            mcmc (MCMC): The MCMC object containing the proposal mechanism and temperature
+            proposal (proposal): The proposal mechanism
             current_state (MCMCState): Current state containing bitstring and energy
-            
+            runner (MCMCRunner): The mcmc runner, providing access to temp
         Returns:
             MCMCState: Updated state (either new proposed state if accepted, or original state)
         """
@@ -127,12 +89,12 @@ class QePT():
         energy_s = current_state.energy
         
         # Propose a new state using the MCMC's proposal mechanism
-        s_prime = mcmc.update(s)
+        s_prime = proposal.update(s)
         # Calculate energy of the proposed state
-        energy_sprime = mcmc.model.get_energy(s_prime)
+        energy_sprime = self.model.get_energy(s_prime)
         
         # Apply Metropolis acceptance criterion
-        accepted = mcmc.test_accept(energy_s, energy_sprime, temperature=mcmc.temp)
+        accepted = runner.is_accepted(energy_s, energy_sprime,runner.temp)
         
         # Update current_state if the proposal was accepted
         if accepted:
@@ -186,17 +148,18 @@ class QePT():
             np.ndarray: current_states (list): Final states of all replicas
                 
 
-        """        
-        
-        # Initialize random starting configurations for all replicas
+        """   
+        self.runners = []
         current_states = []
-        for i, mcmc in enumerate(self.mcmcs):
-            mcmc.temp = temps[i]  # Assign temperature to each replica
-            # Generate random initial state - Note: calling get_random_state twice may be inefficient
+        for i, proposal in enumerate(self.proposals):
             random_state = get_random_state(self.model.n_spins)
-            initial_energy = mcmc.model.get_energy(random_state)
+            runner = MCMCRunner(self.model, temps[i])  
+            self.runners.append(runner)
+            initial_energy = runner.model.get_energy(random_state)
             current_states.append(MCMCState(random_state, True, initial_energy))
-            #energies[i, 0] = current_states[i].energy
+
+        
+        
 
         #print("n_steps // n_steps_between_exchange:", n_steps // n_steps_between_exchange)
         n_steps_between_exchange = n_steps_between_exchange//2  # Adjust for odd-even exchange scheme
@@ -213,14 +176,14 @@ class QePT():
             # Not actually in parallel...
             if n < n_steps // n_steps_between_exchange:
                 updated_states = [
-                    self.update_n(mcmc, current_states[i], n_steps_between_exchange)
-                    for i, mcmc in enumerate(self.mcmcs)
+                    self.update_n(proposal, self.runners[i], current_states[i], n_steps_between_exchange)
+                    for i, proposal in enumerate(self.proposals)
                 ]
             else:
                 remaining_steps = n_steps % n_steps_between_exchange
                 updated_states = [
-                    self.update_n(mcmc, current_states[i], remaining_steps)
-                    for i, mcmc in enumerate(self.mcmcs)
+                    self.update_n(proposal, self.runners[i], current_states[i], remaining_steps)
+                    for i, proposal in enumerate(self.proposals)
                 ]
             current_states = updated_states
             energy_history[:, 2*(n+1)-2] = [state.energy for state in current_states]  # Record energy history after updates

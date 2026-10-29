@@ -7,9 +7,9 @@ requires-python = ">=3.13"
 dependencies = [
     "cmake>=4.2.1",
     "gurobipy>=13.0.1",
+    "ipykernel>=7.4.0",
+    "joblib>=1.6.0",
+    "matplotlib>=3.11.2",
     "pennylane>=0.44.0",
-    "qemcmc",
+    "qemcmc==0.6.1",
 ]
-
-[tool.uv.sources]
-qemcmc = { git = "https://github.com/Stuartferguson00/QeMCMC" }
